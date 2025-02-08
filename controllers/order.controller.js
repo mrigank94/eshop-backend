@@ -62,30 +62,6 @@ const getOrderByUserId = async (req, res) => {
 };
 
 const partiallyCancelOrder = async (req, res) => {
-  /*
-
-        Items
-        order.items
-        [
-            {
-                product: '1',
-                quantity: '10'
-            },
-            {
-                product: '2',
-                quantity: '20'
-            }
-        ]
-
-        // Partial cancellation
-        itemsToBeCancelled
-        [
-            {
-                product: '1',
-                quantity: '5'
-            },
-        ]
-    */
   const { id } = req.params;
   const { items: itemsToBeCancelled } = req.body;
 
