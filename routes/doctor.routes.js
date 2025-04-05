@@ -1,24 +1,21 @@
+const express = require("express");
+const router = express.Router();
 const {
   createDoctor,
   getAllDoctors,
   getDoctorById,
   updateDoctorById,
   deleteDoctorById,
+  getDoctorAppointments,
 } = require("../controllers/doctor.controller");
 const { verifyToken, verifyAdmin } = require("../middlewares/auth");
 
-module.exports = function (app) {
-  app.post("/api/v1/doctors", [verifyToken, verifyAdmin], createDoctor);
+// Doctor routes
+router.post("/", [verifyToken, verifyAdmin], createDoctor);
+router.get("/", getAllDoctors);
+router.get("/:id", getDoctorById);
+router.get("/:id/appointments", getDoctorAppointments);
+router.put("/:id", updateDoctorById);
+router.delete("/:id", [verifyToken, verifyAdmin], deleteDoctorById);
 
-  app.get("/api/v1/doctors", getAllDoctors);
-
-  app.get("/api/v1/doctors/:id", getDoctorById);
-
-  app.put("/api/v1/doctors/:id", updateDoctorById);
-
-  app.delete(
-    "/api/v1/doctors/:id",
-    [verifyToken, verifyAdmin],
-    deleteDoctorById
-  );
-};
+module.exports = router;

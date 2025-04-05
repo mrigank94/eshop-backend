@@ -38,8 +38,8 @@ const userSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ["ADMIN", "CUSTOMER"],
-    default: "CUSTOMER",
+    enum: ["ADMIN", "PATIENT", "DOCTOR"],
+    default: "PATIENT",
   },
   userStatus: {
     type: String,

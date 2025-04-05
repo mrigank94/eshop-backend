@@ -1,21 +1,19 @@
+const express = require("express");
+const router = express.Router();
 const {
   createAppointment,
   getAppointmentById,
+  updateAppointmentById,
   deleteAppointmentById,
-  getAppointmentByUserId,
+  getPatientAppointments,
 } = require("../controllers/appointment.controller");
 const { verifyToken } = require("../middlewares/auth");
 
-module.exports = function (app) {
-  app.post("/api/v1/appointments", [verifyToken], createAppointment);
+// Appointment routes
+router.post("/", verifyToken, createAppointment);
+router.get("/patient/:patientId", verifyToken, getPatientAppointments);
+router.get("/:id", verifyToken, getAppointmentById);
+router.put("/:id", verifyToken, updateAppointmentById);
+router.delete("/:id", verifyToken, deleteAppointmentById);
 
-  app.get("/api/v1/appointments/:id", getAppointmentById);
-
-  app.delete("/api/v1/appointments/:id", deleteAppointmentById);
-
-  app.get(
-    "/api/v1/appointments/users/:id",
-    [verifyToken],
-    getAppointmentByUserId
-  );
-};
+module.exports = router;

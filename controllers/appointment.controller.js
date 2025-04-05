@@ -1,15 +1,21 @@
 const Appointment = require("../models/appointment.model");
 const Doctor = require("../models/doctor.model");
 
+// Create a new appointment
 const createAppointment = async (req, res) => {
   // Check if doctor is valid and appointment slot is empty
 
   const doctorId = req.body.doctor;
-  const doctor = await Doctor.findById(doctorId);
+  const doctor = await Doctor.findOne({
+    user: doctorId,
+  });
 
   if (!doctor) {
     return res.status(404).send("Doctor with given id does not exist");
   }
+
+  console.log(doctor);
+  console.log(doctor.availability);
 
   const { appointmentDate, timeSlot } = req.body;
 
@@ -19,7 +25,11 @@ const createAppointment = async (req, res) => {
   const dayOfWeek = new Date(appointmentDate).toLocaleString("en-US", {
     weekday: "long",
   });
-  const availableDay = doctor.availability.find((day) => day === dayOfWeek);
+
+  console.log(dayOfWeek);
+  const availableDay = doctor.availability.find(
+    (avail) => avail.day === dayOfWeek
+  );
 
   if (!availableDay) {
     return res.status(400).send("Doctor does not sit on the requested day");
@@ -47,41 +57,65 @@ const createAppointment = async (req, res) => {
   res.status(201).send(appointment);
 };
 
+// Get appointment by ID
 const getAppointmentById = async (req, res) => {
-  const id = req.params.id;
-
-  let appointment = await Appointment.findById(id);
-
-  if (!appointment) {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+    res.status(200).json(appointment);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  appointment = await appointment.populate("patient");
-  appointment = await appointment.populate("doctor");
-
-  res.send(appointment);
 };
 
+// Update appointment by ID
+const updateAppointmentById = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+    res.status(200).json(appointment);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Delete appointment by ID
 const deleteAppointmentById = async (req, res) => {
-  const id = req.params.id;
-
-  const appointment = await Appointment.findByIdAndDelete(id);
-
-  if (!appointment) {
-    return res.status(404).send("Appointment with given id does not exist");
+  try {
+    const appointment = await Appointment.findByIdAndDelete(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+    res.status(200).json({ message: "Appointment deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  res.send(appointment);
 };
 
-const getAppointmentByUserId = async (req, res) => {
-  const appointmentsByUser = await Appointment.find({
-    patient: req.userId,
-  });
-  res.send(appointmentsByUser);
+// Get patient's appointments
+const getPatientAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({
+      patient: req.params.patientId,
+    });
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = {
   createAppointment,
   getAppointmentById,
-  getAppointmentByUserId,
+  updateAppointmentById,
   deleteAppointmentById,
+  getPatientAppointments,
 };
